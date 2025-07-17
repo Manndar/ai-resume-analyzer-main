@@ -34,7 +34,6 @@ def configure_app():
     load_dotenv()
     genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
-
 def extract_text_from_pdf(pdf_path):
     """Extract text from a PDF file, using OCR as fallback."""
     text = ""
@@ -59,7 +58,12 @@ def extract_text_from_pdf(pdf_path):
         print(f"OCR failed: {e}")
     return text.strip()
 
-
+# Add this function at the top level with other functions
+def clear_job_description():
+    """Callback function to clear job description"""
+    st.session_state.job_description = ""
+    st.session_state.text_area = ""
+    
 def analyze_resume_with_gemini(resume_text, job_description=None):
     if not resume_text:
         return {"error": "Resume text is required for analysis."} 
@@ -100,14 +104,25 @@ def main():
     st.title("AI Resume Analyzer")
     st.write("Analyze your resume and match it with job descriptions using Google Gemini AI.")
 
+   # Initialize session state for job description if it doesn't exist
+    if 'job_description' not in st.session_state:
+        st.session_state.job_description = ""
     col1, col2 = st.columns(2)
     with col1:
         uploaded_file = st.file_uploader("Upload your resume (PDF)", type=["pdf"])
     with col2:
-        job_description = st.text_area("Enter Job Description:", placeholder="Paste the job description here...")
-        if st.button("Clear"):
-            job_description = ""  # Clear the job description field
-
+        job_description = st.text_area(
+            "Enter Job Description:",
+            key="text_area",  # Add a key for the text area
+            value=st.session_state.job_description,
+            placeholder="Paste the job description here..."
+        )
+        st.button("Clear", on_click=clear_job_description)  # Use the callback function
+    
+    
+    # Update session state with current text area value
+    st.session_state.job_description = job_description
+    
     if uploaded_file is not None:
         st.success("Resume uploaded successfully!")
     else:
