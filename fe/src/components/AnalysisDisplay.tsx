@@ -2,6 +2,7 @@
 
 import { AnalysisResult } from '../types';
 import ReactMarkdown from 'react-markdown';
+import { Box, Typography } from '@mui/material';
 
 interface AnalysisDisplayProps {
     analysis: AnalysisResult;
@@ -9,8 +10,13 @@ interface AnalysisDisplayProps {
 
 export default function AnalysisDisplay({ analysis }: AnalysisDisplayProps) {
     return (
-        <div className="prose prose-blue max-w-none">
-            <ReactMarkdown>{analysis.analysis}</ReactMarkdown>
-        </div>
+        <Box>
+            <Typography variant="h6" gutterBottom>
+                Analysis Result
+            </Typography>
+            <Box sx={{ typography: 'body1' }}>
+                <ReactMarkdown>{analysis.analysis}</ReactMarkdown>
+            </Box>
+        </Box>
     );
 }

@@ -1,8 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { Box, Button, TextField, Typography, Alert, CircularProgress } from '@mui/material';
 import { AnalysisResult } from '../types';
 import AnalysisDisplay from './AnalysisDisplay';
+import CloseIcon from '@mui/icons-material/Close';
+import IconButton from '@mui/material/IconButton';
 
 export default function ResumeAnalyzer() {
     const [file, setFile] = useState<File | null>(null);
@@ -10,6 +13,13 @@ export default function ResumeAnalyzer() {
     const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (!file) {
+            setAnalysis(null);
+        }
+        setError(null);
+    }, [file]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -47,62 +57,74 @@ export default function ResumeAnalyzer() {
     };
 
     return (
-        <div className="bg-white rounded-lg shadow-lg p-6">
-            <form onSubmit={handleSubmit} className="space-y-6">
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+        <Box
+            sx={{
+                backgroundColor: 'gray.50',
+                borderRadius: 2,
+                boxShadow: 3,
+                p: 4,
+                maxWidth: 800,
+                mx: 'auto',
+                mt: 4,
+            }}
+        >
+            <form onSubmit={handleSubmit}>
+                <Box mb={3}>
+                    <Typography variant="subtitle1" gutterBottom>
                         Upload Resume (PDF)
-                    </label>
+                    </Typography>
                     <input
                         type="file"
                         accept=".pdf"
                         onChange={(e) => setFile(e.target.files?.[0] || null)}
-                        className="block w-full text-sm text-gray-500
-              file:mr-4 file:py-2 file:px-4
-              file:rounded-full file:border-0
-              file:text-sm file:font-semibold
-              file:bg-blue-50 file:text-blue-700
-              hover:file:bg-blue-100"
                     />
-                </div>
+                    {file && (
+                        <IconButton
+                            onClick={() => setFile(null)}
+                            color="secondary"
+                            sx={{ ml: 2 }}
+                            aria-label="Remove File"
+                        >
+                            <CloseIcon />
+                        </IconButton>
+                    )}
+                </Box>
 
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Job Description (Optional)
-                    </label>
-                    <textarea
+                <Box mb={3}>
+                    <TextField
+                        label="Job Description (Optional)"
+                        multiline
+                        rows={4}
+                        fullWidth
                         value={jobDescription}
                         onChange={(e) => setJobDescription(e.target.value)}
-                        rows={4}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                        placeholder="Paste the job description here..."
+                        variant="outlined"
                     />
-                </div>
+                </Box>
 
-                <button
+                <Button
                     type="submit"
+                    fullWidth
+                    variant="contained"
+                    color="primary"
                     disabled={loading || !file}
-                    className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white 
-            ${loading || !file
-                            ? 'bg-gray-400 cursor-not-allowed'
-                            : 'bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
-                        }`}
+                    startIcon={loading ? <CircularProgress size={20} color="inherit" /> : null}
                 >
                     {loading ? 'Analyzing...' : 'Analyze Resume'}
-                </button>
+                </Button>
             </form>
 
             {error && (
-                <div className="mt-4 p-4 bg-red-50 text-red-700 rounded-md">
-                    {error}
-                </div>
+                <Box mt={3}>
+                    <Alert severity="error">{error}</Alert>
+                </Box>
             )}
 
             {analysis && (
-                <div className="mt-8">
+                <Box mt={4}>
                     <AnalysisDisplay analysis={analysis} />
-                </div>
+                </Box>
             )}
-        </div>
+        </Box>
     );
 }
